@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 android {
     namespace = "com.aubynsamuel.clipsync"
     compileSdk = 36
@@ -16,8 +18,8 @@ android {
         applicationId = "com.aubynsamuel.clipsync"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.3.1"
+        versionCode = 7
+        versionName = "1.3.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,6 +59,7 @@ dependencies {
     testImplementation(libs.androidx.ui.test.junit4.android)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockito.core)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.test.core)
@@ -98,4 +101,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
