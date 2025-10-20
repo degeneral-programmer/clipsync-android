@@ -24,7 +24,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,15 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.aubynsamuel.clipsync.core.Essentials.isServiceBound
-import com.aubynsamuel.clipsync.core.Essentials.toggleAutoCopy
 import com.aubynsamuel.clipsync.ui.component.AppInfoCard
 import com.aubynsamuel.clipsync.ui.component.SettingItem
 import com.aubynsamuel.clipsync.ui.component.WindowsCompanionCard
 import com.aubynsamuel.clipsync.ui.navigation.Screens
 import com.aubynsamuel.clipsync.ui.navigation.safePopBackStack
 import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,13 +50,6 @@ fun SettingsScreen(
     var showResetDialog by remember { mutableStateOf(false) }
     val autoCopy by settingsViewModel.autoCopy.collectAsStateWithLifecycle()
     val isDarkMode by settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
-
-    LaunchedEffect(autoCopy) {
-        delay(300)
-        if (isServiceBound) {
-            toggleAutoCopy(autoCopy)
-        }
-    }
 
     Scaffold(
         topBar = {

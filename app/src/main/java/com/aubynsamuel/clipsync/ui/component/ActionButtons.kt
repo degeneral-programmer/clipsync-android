@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ActionButtons(
-    startBluetoothService: (Set<String>) -> Unit,
+    startBluetoothService: () -> Unit,
     stopBluetoothService: () -> Unit,
     selectedDeviceAddresses: Set<String>,
     scope: CoroutineScope,
@@ -32,7 +32,7 @@ fun ActionButtons(
             onClick = {
                 if (isServiceBound)
                     stopBluetoothService()
-                else startBluetoothService(selectedDeviceAddresses)
+                else startBluetoothService()
             },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(100.dp),

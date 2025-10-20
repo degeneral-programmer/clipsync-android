@@ -25,6 +25,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aubynsamuel.clipsync.bluetooth.BluetoothService
+import com.aubynsamuel.clipsync.core.Essentials
 import com.aubynsamuel.clipsync.core.SettingsPreferences
 import com.aubynsamuel.clipsync.core.showToast
 import com.aubynsamuel.clipsync.ui.navigation.Navigation
@@ -33,7 +34,6 @@ import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
 
 class MainActivity : ComponentActivity() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
-    private var autoCopyEnabled: Boolean = false
     private var pairedDevices by mutableStateOf<Set<BluetoothDevice>>(emptySet())
 
     private var discoveredDevices by mutableStateOf<List<BluetoothDevice>>(emptyList())
@@ -50,17 +50,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsPrefs = SettingsPreferences(this)
             val settingsViewModel = viewModel { SettingsViewModel(settingsPrefs) }
-            autoCopyEnabled = settingsViewModel.autoCopy.collectAsStateWithLifecycle().value
+            val autoCopyEnabled = settingsViewModel.autoCopy.collectAsStateWithLifecycle().value
             val darkTheme = settingsViewModel.isDarkMode.collectAsStateWithLifecycle().value
-            // Set status bar icons color to match app theme
+
+            Essentials.updateAutoCopy(autoCopyEnabled)
+
             WindowCompat.getInsetsController(window, window.decorView)
                 .isAppearanceLightStatusBars = !darkTheme
 
             ClipSyncTheme(darkTheme = darkTheme) {
                 Navigation(
-                    startBluetoothService = { selectedDeviceAddresses ->
-                        startBluetoothService(selectedDeviceAddresses)
-                    },
+                    startBluetoothService = { startBluetoothService() },
                     pairedDevices = pairedDevices,
                     refreshPairedDevices = { getPairedDevicesList() },
                     stopBluetoothService = { stopBluetoothService() },
@@ -237,12 +237,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startBluetoothService(selectedDeviceAddresses: Set<String>) {
+    private fun startBluetoothService() {
         checkPermissions()
-        val serviceIntent = Intent(this, BluetoothService::class.java).apply {
-            putExtra("SELECTED_DEVICES", selectedDeviceAddresses.toTypedArray())
-            putExtra("AUTO_COPY_ENABLED", autoCopyEnabled)
-        }
+        val serviceIntent = Intent(this, BluetoothService::class.java)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)

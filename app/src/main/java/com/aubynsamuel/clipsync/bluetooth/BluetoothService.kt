@@ -39,7 +39,7 @@ class BluetoothService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var bluetoothAdapter: BluetoothAdapter
-    private var selectedDeviceAddresses = arrayOf<String>()
+    private var selectedDeviceAddresses = setOf<String>()
     private var autoCopyEnabled = true
     private var serverSocket: BluetoothServerSocket? = null
     private var receiverThread: Thread? = null
@@ -58,39 +58,29 @@ class BluetoothService : Service() {
     override fun onCreate() {
         super.onCreate()
         serviceScope.launch {
-            Essentials.setBluetoothService(this@BluetoothService)
+            Essentials.setServiceRunning(true)
+            Essentials.selectedDevices.collect { devices ->
+                selectedDeviceAddresses = devices
+            }
+        }
+        serviceScope.launch {
+            Essentials.autoCopy.collect { isEnabled ->
+                autoCopyEnabled = isEnabled
+            }
         }
         createNotificationChannel(this)
-
         val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
-
         startForeground(FOREGROUND_NOTIFICATION_ID, createServiceNotification(this))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.getStringArrayExtra("SELECTED_DEVICES")?.let {
-            selectedDeviceAddresses = it
-        }
-        intent?.getBooleanExtra("AUTO_COPY_ENABLED", true)?.let {
-            autoCopyEnabled = it
-        }
-
         startBluetoothServer()
-
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder
-    }
-
-    fun updateSelectedDevices(selectedDevices: Array<String>) {
-        selectedDeviceAddresses = selectedDevices
-    }
-
-    fun toggleAutoCopy(value: Boolean) {
-        autoCopyEnabled = value
     }
 
     private fun startBluetoothServer() {
@@ -205,7 +195,7 @@ class BluetoothService : Service() {
             serverSocket?.close()
             receiverThread?.interrupt()
             serviceScope.launch {
-                Essentials.clean()
+                Essentials.clear()
             }
         } catch (e: IOException) {
             Log.e(TAG, "Error closing server socket", e)
