@@ -52,15 +52,13 @@ class MainActivity : ComponentActivity() {
             val settingsViewModel = viewModel { SettingsViewModel(settingsPrefs) }
             autoCopyEnabled = settingsViewModel.autoCopy.collectAsStateWithLifecycle().value
             val darkTheme = settingsViewModel.isDarkMode.collectAsStateWithLifecycle().value
-            // Set status bar icons color to match app theme
+
             WindowCompat.getInsetsController(window, window.decorView)
                 .isAppearanceLightStatusBars = !darkTheme
 
             ClipSyncTheme(darkTheme = darkTheme) {
                 Navigation(
-                    startBluetoothService = { selectedDeviceAddresses ->
-                        startBluetoothService(selectedDeviceAddresses)
-                    },
+                    startBluetoothService = { startBluetoothService() },
                     pairedDevices = pairedDevices,
                     refreshPairedDevices = { getPairedDevicesList() },
                     stopBluetoothService = { stopBluetoothService() },
@@ -237,10 +235,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startBluetoothService(selectedDeviceAddresses: Set<String>) {
+    private fun startBluetoothService() {
         checkPermissions()
         val serviceIntent = Intent(this, BluetoothService::class.java).apply {
-            putExtra("SELECTED_DEVICES", selectedDeviceAddresses.toTypedArray())
             putExtra("AUTO_COPY_ENABLED", autoCopyEnabled)
         }
 

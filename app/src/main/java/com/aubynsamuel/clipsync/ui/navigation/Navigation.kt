@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun Navigation(
-    startBluetoothService: (Set<String>) -> Unit,
+    startBluetoothService: () -> Unit,
     pairedDevices: Set<BluetoothDevice>,
     refreshPairedDevices: () -> Unit,
     stopBluetoothService: () -> Unit,

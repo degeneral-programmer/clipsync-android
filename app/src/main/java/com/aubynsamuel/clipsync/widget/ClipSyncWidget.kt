@@ -103,12 +103,7 @@ class ClipSyncWidget : GlanceAppWidget() {
                     WidgetContent(
                         pairedDevices = pairedDevices,
                         stopBluetoothService = { stopBluetoothService(context) },
-                        startBluetoothService = { devices ->
-                            startBluetoothService(
-                                devices,
-                                context
-                            )
-                        },
+                        startBluetoothService = { startBluetoothService(context) },
                         bluetoothEnabled = bluetoothEnabled,
                         context = context,
                         id = id
@@ -182,7 +177,7 @@ class ClipSyncWidget : GlanceAppWidget() {
         }
     }
 
-    private fun startBluetoothService(selectedDeviceAddresses: Set<String>, context: Context) {
+    private fun startBluetoothService(context: Context) {
         try {
             if (bluetoothEnabled) {
                 loadPairedDevices(context)
@@ -191,7 +186,6 @@ class ClipSyncWidget : GlanceAppWidget() {
             fetchAutoCopySetting(context)
 
             val serviceIntent = Intent(context, BluetoothService::class.java).apply {
-                putExtra("SELECTED_DEVICES", selectedDeviceAddresses.toTypedArray())
                 putExtra("AUTO_COPY_ENABLED", autoCopyEnabled)
             }
 

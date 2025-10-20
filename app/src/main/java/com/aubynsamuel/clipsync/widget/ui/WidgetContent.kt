@@ -7,12 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -20,6 +16,7 @@ import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.ActionCallback
@@ -41,11 +38,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.aubynsamuel.clipsync.activities.MainActivity
 import com.aubynsamuel.clipsync.activities.ShareClipboardActivity
-import com.aubynsamuel.clipsync.core.Essentials.isServiceBound
-import com.aubynsamuel.clipsync.core.Essentials.selectedDeviceAddresses
-import com.aubynsamuel.clipsync.core.Essentials.updateSelectedDevices
+import com.aubynsamuel.clipsync.core.Essentials
 import com.aubynsamuel.clipsync.widget.ClipSyncWidget
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,21 +47,13 @@ fun WidgetContent(
     context: Context,
     pairedDevices: Set<BluetoothDevice>,
     stopBluetoothService: () -> Unit,
-    startBluetoothService: (Set<String>) -> Unit,
+    startBluetoothService: () -> Unit,
     bluetoothEnabled: Boolean,
     id: GlanceId
 ) {
-    var selectedDeviceAddresses by rememberSaveable {
-        mutableStateOf<Set<String>>(
-            selectedDeviceAddresses.toSet()
-        )
-    }
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(selectedDeviceAddresses) {
-        delay(300)
-        updateSelectedDevices(selectedDeviceAddresses.toTypedArray())
-    }
+    val isServiceBound = Essentials.isServiceRunning.collectAsState().value
+    val selectedDeviceAddresses = Essentials.selectedDevices.collectAsState().value
 
     Column(
         modifier = GlanceModifier
@@ -112,7 +98,7 @@ fun WidgetContent(
                             stopBluetoothService()
                         } else {
                             if (bluetoothEnabled) {
-                                startBluetoothService(selectedDeviceAddresses)
+                                startBluetoothService()
                             }
                         }
                         ClipSyncWidget().update(context, id)
@@ -157,15 +143,11 @@ fun WidgetContent(
                         val isSelected = selectedDeviceAddresses.contains(address)
 
                         DeviceItem(
-                            onChecked = {
-                                scope.launch {
-                                    selectedDeviceAddresses =
-                                        if (!isSelected) {
-                                            selectedDeviceAddresses + address
-                                        } else selectedDeviceAddresses - address
-                                    ClipSyncWidget().update(context, id)
-                                }
-                            },
+                            onChecked = actionRunCallback<ToggleDeviceCallback>(
+                                parameters = actionParametersOf(
+                                    ActionParameters.Key<String>("deviceAddress") to address
+                                )
+                            ),
                             checked = isSelected,
                             name = name,
                         )
@@ -173,6 +155,24 @@ fun WidgetContent(
                 }
             }
         }
+    }
+}
+
+class ToggleDeviceCallback : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        val address = parameters[ActionParameters.Key<String>("deviceAddress")] ?: return
+        val currentDevices = Essentials.selectedDevices.value
+        val newDevices = if (currentDevices.contains(address)) {
+            currentDevices - address
+        } else {
+            currentDevices + address
+        }
+        Essentials.updateSelectedDevices(newDevices)
+        ClipSyncWidget().update(context, glanceId)
     }
 }
 

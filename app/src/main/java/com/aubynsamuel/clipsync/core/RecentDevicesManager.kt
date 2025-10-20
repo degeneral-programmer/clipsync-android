@@ -29,7 +29,7 @@ class RecentDevicesManager(context: Context) {
     }
 
     fun add(item: String) {
-        // Remove if exists to move it to end
+        // Remove if it exists to move it to the end
         recentItems.remove(item)
         recentItems.add(item)
 

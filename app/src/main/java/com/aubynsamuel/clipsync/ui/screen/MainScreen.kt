@@ -29,12 +29,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,9 +44,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.aubynsamuel.clipsync.core.Essentials.isServiceBound
-import com.aubynsamuel.clipsync.core.Essentials.selectedDeviceAddresses
-import com.aubynsamuel.clipsync.core.Essentials.updateSelectedDevices
+import com.aubynsamuel.clipsync.core.Essentials
 import com.aubynsamuel.clipsync.core.RecentDevicesManager
 import com.aubynsamuel.clipsync.ui.component.ActionButtons
 import com.aubynsamuel.clipsync.ui.component.CustomPullToRefreshBox
@@ -60,12 +54,12 @@ import com.aubynsamuel.clipsync.ui.navigation.Screens
 import com.aubynsamuel.clipsync.ui.theme.Typography
 import com.aubynsamuel.clipsync.ui.viewModel.RecentDevicesViewModel
 import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    startBluetoothService: (Set<String>) -> Unit,
+    startBluetoothService: () -> Unit,
     pairedDevices: Set<BluetoothDevice>,
     refreshPairedDevices: () -> Unit,
     stopBluetoothService: () -> Unit,
@@ -75,21 +69,15 @@ fun MainScreen(
     val context = LocalContext.current
     val recentDevicesViewModel: RecentDevicesViewModel =
         viewModel { RecentDevicesViewModel(RecentDevicesManager(context)) }
-    var selectedDeviceAddresses by rememberSaveable {
-        mutableStateOf<Set<String>>(
-            selectedDeviceAddresses.toSet()
-        )
-    }
     val scope = rememberCoroutineScope()
     val colorScheme = MaterialTheme.colorScheme
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val isServiceBound by Essentials.isServiceRunning.collectAsStateWithLifecycle()
+    val selectedDeviceAddresses by Essentials.selectedDevices.collectAsStateWithLifecycle()
     val isDarkMode by settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
     val recentDevices by recentDevicesViewModel.recentItems.collectAsStateWithLifecycle()
 
-    LaunchedEffect(selectedDeviceAddresses) {
-        delay(300)
-        updateSelectedDevices(selectedDeviceAddresses.toTypedArray())
-    }
     CustomPullToRefreshBox(
         refreshPairedDevices = refreshPairedDevices,
         modifier = Modifier
@@ -130,7 +118,9 @@ fun MainScreen(
                                     contentDescription = "Deselect devices",
                                     tint = colorScheme.error,
                                     modifier = Modifier.clickable {
-                                        selectedDeviceAddresses = emptySet()
+                                        scope.launch {
+                                            Essentials.updateSelectedDevices(emptySet())
+                                        }
                                     }
                                 )
                             }
@@ -203,9 +193,12 @@ fun MainScreen(
 
                             DeviceItem(
                                 onChecked = {
-                                    selectedDeviceAddresses =
-                                        if (!isSelected) selectedDeviceAddresses + address
+                                    scope.launch {
+                                        val updatedDevices = if (!isSelected)
+                                            selectedDeviceAddresses + address
                                         else selectedDeviceAddresses - address
+                                        Essentials.updateSelectedDevices(updatedDevices)
+                                    }
                                 },
                                 checked = isSelected,
                                 name = name,
@@ -235,11 +228,15 @@ fun MainScreen(
 
                         DeviceItem(
                             onChecked = {
-                                selectedDeviceAddresses =
-                                    if (!isSelected) {
-                                        recentDevicesViewModel.addRecentDevice(address)
+                                if (!isSelected) {
+                                    recentDevicesViewModel.addRecentDevice(address)
+                                }
+                                scope.launch {
+                                    val updatedDevices = if (!isSelected)
                                         selectedDeviceAddresses + address
-                                    } else selectedDeviceAddresses - address
+                                    else selectedDeviceAddresses - address
+                                    Essentials.updateSelectedDevices(updatedDevices)
+                                }
                             },
                             checked = isSelected,
                             name = name,
