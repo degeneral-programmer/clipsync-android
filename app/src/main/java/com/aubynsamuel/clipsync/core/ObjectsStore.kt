@@ -17,12 +17,19 @@ object Essentials {
     private val _selectedDevices = MutableStateFlow<Set<String>>(emptySet())
     val selectedDevices: StateFlow<Set<String>> = _selectedDevices.asStateFlow()
 
+    private val _autoCopy = MutableStateFlow(true)
+    val autoCopy: StateFlow<Boolean> = _autoCopy.asStateFlow()
+
     fun setServiceRunning(isRunning: Boolean) {
         _isServiceRunning.value = isRunning
     }
 
     fun updateSelectedDevices(devices: Set<String>) {
         _selectedDevices.value = devices
+    }
+
+    fun updateAutoCopy(isEnabled: Boolean) {
+        _autoCopy.value = isEnabled
     }
 
     /**

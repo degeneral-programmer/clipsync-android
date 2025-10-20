@@ -21,7 +21,6 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.provideContent
 import com.aubynsamuel.clipsync.bluetooth.BluetoothService
-import com.aubynsamuel.clipsync.core.SettingsPreferences
 import com.aubynsamuel.clipsync.widget.ui.ErrorContent
 import com.aubynsamuel.clipsync.widget.ui.WidgetContent
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +32,6 @@ class ClipSyncWidget : GlanceAppWidget() {
     private var bluetoothEnabled by mutableStateOf(false)
     private var isBluetoothReceiverRegistered = false
     private lateinit var bluetoothAdapter: BluetoothAdapter
-    private var autoCopyEnabled: Boolean = true
 
     private val bluetoothStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -120,11 +118,6 @@ class ClipSyncWidget : GlanceAppWidget() {
         }
     }
 
-    private fun fetchAutoCopySetting(context: Context) {
-        val settingsPrefs = SettingsPreferences(context)
-        autoCopyEnabled = settingsPrefs.getAutoCopy()
-    }
-
     private fun registerBluetoothReceiver(context: Context) {
         if (!isBluetoothReceiverRegistered) {
             try {
@@ -183,11 +176,7 @@ class ClipSyncWidget : GlanceAppWidget() {
                 loadPairedDevices(context)
             }
 
-            fetchAutoCopySetting(context)
-
-            val serviceIntent = Intent(context, BluetoothService::class.java).apply {
-                putExtra("AUTO_COPY_ENABLED", autoCopyEnabled)
-            }
+            val serviceIntent = Intent(context, BluetoothService::class.java)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(serviceIntent)

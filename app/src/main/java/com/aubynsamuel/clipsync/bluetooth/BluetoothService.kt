@@ -63,17 +63,18 @@ class BluetoothService : Service() {
                 selectedDeviceAddresses = devices
             }
         }
+        serviceScope.launch {
+            Essentials.autoCopy.collect { isEnabled ->
+                autoCopyEnabled = isEnabled
+            }
+        }
         createNotificationChannel(this)
         val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         startForeground(FOREGROUND_NOTIFICATION_ID, createServiceNotification(this))
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.getBooleanExtra("AUTO_COPY_ENABLED", true)?.let {
-            autoCopyEnabled = it
-        }
         startBluetoothServer()
         return START_STICKY
     }
