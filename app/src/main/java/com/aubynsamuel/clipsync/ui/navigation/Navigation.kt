@@ -10,6 +10,7 @@ import com.aubynsamuel.clipsync.ui.screen.MainScreen
 import com.aubynsamuel.clipsync.ui.screen.SettingsScreen
 import com.aubynsamuel.clipsync.ui.screen.SupportScreen
 import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
+import kotlinx.serialization.Serializable
 
 @Composable
 fun Navigation(
@@ -27,9 +28,9 @@ fun Navigation(
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "MainScreen"
+        startDestination = Screens.MainScreen
     ) {
-        composable("MainScreen") {
+        composable<Screens.MainScreen> {
             MainScreen(
                 startBluetoothService = startBluetoothService,
                 pairedDevices = pairedDevices,
@@ -40,20 +41,20 @@ fun Navigation(
             )
         }
 
-        composable("SettingsScreen") {
+        composable<Screens.SettingsScreen> {
             SettingsScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel,
             )
         }
 
-        composable("SupportScreen") {
+        composable<Screens.SupportScreen> {
             SupportScreen(
                 navController = navController,
             )
         }
 
-        composable("BluetoothScannerScreen") {
+        composable<Screens.BluetoothScannerScreen> {
             BluetoothScannerScreen(
                 navController = navController,
                 discoveredDevices = discoveredDevices,
@@ -64,4 +65,18 @@ fun Navigation(
             )
         }
     }
+}
+
+object Screens {
+    @Serializable
+    object MainScreen
+
+    @Serializable
+    object SettingsScreen
+
+    @Serializable
+    object SupportScreen
+
+    @Serializable
+    object BluetoothScannerScreen
 }

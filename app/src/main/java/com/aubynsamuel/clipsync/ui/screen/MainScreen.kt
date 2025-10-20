@@ -56,6 +56,7 @@ import com.aubynsamuel.clipsync.ui.component.ActionButtons
 import com.aubynsamuel.clipsync.ui.component.CustomPullToRefreshBox
 import com.aubynsamuel.clipsync.ui.component.DarkModeToggle
 import com.aubynsamuel.clipsync.ui.component.DeviceItem
+import com.aubynsamuel.clipsync.ui.navigation.Screens
 import com.aubynsamuel.clipsync.ui.theme.Typography
 import com.aubynsamuel.clipsync.ui.viewModel.RecentDevicesViewModel
 import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
@@ -121,7 +122,6 @@ fun MainScreen(
                                     text = "${selectedDeviceAddresses.count()} selected",
                                     fontSize = 18.sp,
                                     color = colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                             AnimatedVisibility(selectedDeviceAddresses.isNotEmpty()) {
@@ -142,16 +142,6 @@ fun MainScreen(
                             horizontalArrangement = Arrangement.spacedBy(15.dp),
                             modifier = Modifier.padding(end = 10.dp)
                         ) {
-//                            Text(
-//                                "Scan",
-//                                color = colorScheme.onPrimaryContainer,
-//                                fontWeight = FontWeight.Bold,
-//                                fontSize = 17.sp,
-//                                modifier = Modifier.clickable {
-//                                    navController.navigate("BluetoothScannerScreen")
-//                                }
-//                            )
-
                             DarkModeToggle(
                                 isDarkMode = isDarkMode,
                                 onToggle = { settingsViewModel.switchTheme() },
@@ -164,7 +154,7 @@ fun MainScreen(
                                 modifier = Modifier
                                     .size(25.dp)
                                     .clickable {
-                                        navController.navigate("SettingsScreen")
+                                        navController.navigate(Screens.SettingsScreen)
                                     }
                             )
                         }
