@@ -2,8 +2,10 @@ package com.aubynsamuel.clipsync.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -83,7 +85,6 @@ fun SupportScreen(
             Text(
                 text = "Frequently Asked Questions",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp, 8.dp, 16.dp, 8.dp)
             )
 
@@ -119,11 +120,12 @@ fun SupportScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
             // Contact Section
             Text(
                 text = "Contact Support",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 8.dp)
             )
 

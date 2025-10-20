@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -43,7 +44,6 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
-            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
         }
     }
     buildFeatures {
@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+    // Testing
     testImplementation(libs.androidx.ui.test.junit4.android)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockito.core)
@@ -75,6 +76,8 @@ dependencies {
     implementation(libs.androidx.glance.material)
     // Material
     implementation(libs.material)
+    // Kotlinx serialization
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

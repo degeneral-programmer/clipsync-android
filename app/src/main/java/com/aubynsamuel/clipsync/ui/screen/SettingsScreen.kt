@@ -1,10 +1,8 @@
 package com.aubynsamuel.clipsync.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,6 +15,7 @@ import androidx.compose.material.icons.filled.Support
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -33,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -42,6 +40,7 @@ import com.aubynsamuel.clipsync.core.Essentials.toggleAutoCopy
 import com.aubynsamuel.clipsync.ui.component.AppInfoCard
 import com.aubynsamuel.clipsync.ui.component.SettingItem
 import com.aubynsamuel.clipsync.ui.component.WindowsCompanionCard
+import com.aubynsamuel.clipsync.ui.navigation.Screens
 import com.aubynsamuel.clipsync.ui.navigation.safePopBackStack
 import com.aubynsamuel.clipsync.ui.viewModel.SettingsViewModel
 import kotlinx.coroutines.delay
@@ -67,9 +66,7 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors()
-                    .copy(
-                        containerColor = Color.Transparent,
-                    ),
+                    .copy(containerColor = Color.Transparent),
                 title = {
                     Text(
                         text = "Settings",
@@ -88,15 +85,13 @@ fun SettingsScreen(
                     }
                 },
                 navigationIcon = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back Button",
-                        modifier = Modifier
-                            .clickable(onClick = { navController.safePopBackStack() })
-                            .padding(horizontal = 8.dp)
-                            .size(25.dp),
-                        tint = colorScheme.onPrimaryContainer,
-                    )
+                    IconButton(onClick = { navController.safePopBackStack() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             )
         }) { innerPadding ->
@@ -161,14 +156,14 @@ fun SettingsScreen(
                 "Support",
                 "Get help and view FAQs",
                 Icons.Default.Support,
-                pressAction = { navController.navigate("SupportScreen") }
+                pressAction = { navController.navigate(Screens.SupportScreen) }
             )
 
             SettingItem(
                 "Scan",
                 "Pair new devices",
                 Icons.AutoMirrored.Filled.BluetoothSearching,
-                pressAction = { navController.navigate("BluetoothScannerScreen") }
+                pressAction = { navController.navigate(Screens.BluetoothScannerScreen) }
             )
         }
     }
